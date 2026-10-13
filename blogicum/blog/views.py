@@ -44,16 +44,24 @@ posts = [
     },
 ]
 
+# Словарь для быстрого поиска поста по id (O(1) вместо перебора O(n))
+posts_by_id = {post['id']: post for post in posts}
+
+
 def index(request):
     context = {'post_list': posts[::-1]}
     return render(request, 'blog/index.html', context)
 
-def post_detail(request, id):
-    post = next((item for item in posts if item['id'] == id), None)
+
+def post_detail(request, post_id):
+    # Быстрый поиск через словарь вместо перебора списка
+    post = posts_by_id.get(post_id)
     if post is None:
-        raise Http404("Пост не найден")
+        raise Http404(f"Пост с id={post_id} не найден")
+    
     context = {'post': post}
     return render(request, 'blog/detail.html', context)
+
 
 def category_posts(request, category_slug):
     context = {'category_slug': category_slug}
